@@ -2,6 +2,7 @@ package guru.springframework.services.security;
 
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,18 +11,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class EncryptionServiceImpl implements EncryptionService {
 
-    private StrongPasswordEncryptor strongEncryptor;
-
-    @Autowired
-    public void setStrongEncryptor(StrongPasswordEncryptor strongEncryptor) {
-        this.strongEncryptor = strongEncryptor;
-    }
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     public String encryptString(String input){
-        return strongEncryptor.encryptPassword(input);
+        return bCryptPasswordEncoder.encode(input);
     }
 
     public boolean checkPassword(String plainPassword, String encryptedPassword){
-        return strongEncryptor.checkPassword(plainPassword, encryptedPassword);
+        return bCryptPasswordEncoder.matches(plainPassword, encryptedPassword);
     }
 }
