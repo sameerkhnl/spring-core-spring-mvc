@@ -6,6 +6,7 @@ import guru.springframework.enums.OrderStatus;
 import guru.springframework.services.ProductService;
 import guru.springframework.services.RoleService;
 import guru.springframework.services.UserService;
+import guru.springframework.services.security.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -23,6 +24,12 @@ public class SpringJPABootstrap implements ApplicationListener<ContextRefreshedE
     private ProductService productService;
     private UserService userService;
     private RoleService roleService;
+    private EncryptionService encryptionService;
+
+    @Autowired
+    public void setEncryptionService(EncryptionService encryptionService) {
+        this.encryptionService = encryptionService;
+    }
 
     @Autowired
     public void setProductService(ProductService productService) {
@@ -47,7 +54,7 @@ public class SpringJPABootstrap implements ApplicationListener<ContextRefreshedE
         loadOrderHistory();
         loadRoles();
         assignUsersToDefaultRole();
-
+        assignUsersToAdminRole();
     }
 
     private void assignUsersToDefaultRole() {
@@ -64,10 +71,30 @@ public class SpringJPABootstrap implements ApplicationListener<ContextRefreshedE
         });
     }
 
+    private void assignUsersToAdminRole() {
+        List<Role> roles = (List<Role>)roleService.listAll();
+        List<User> users = (List<User>)userService.listAll();
+        roles.forEach(role -> {
+            if(role.getRole().equalsIgnoreCase("ADMIN")) {
+                users.forEach(user -> {
+                    if(user.getUsername().equals("fglenanne")) {
+                        user.addRole(role);
+                        userService.saveOrUpdate(user);
+                    }
+                });
+            }
+        });
+
+    }
+
     private void loadRoles() {
         Role role = new Role();
         role.setRole("CUSTOMER");
         roleService.saveOrUpdate(role);
+        Role adminRole = new Role();
+        adminRole.setRole("ADMIN");
+        roleService.saveOrUpdate(adminRole);
+
     }
 
     private void loadOrderHistory() {
@@ -106,6 +133,7 @@ public class SpringJPABootstrap implements ApplicationListener<ContextRefreshedE
         User user1 = new User();
         user1.setUsername("mweston");
         user1.setPassword("password");
+        user1.setEncryptedPassword(encryptionService.encryptString("password"));
 
         Customer customer1 = new Customer();
         customer1.setFirstName("Micheal");
@@ -123,6 +151,7 @@ public class SpringJPABootstrap implements ApplicationListener<ContextRefreshedE
         User user2 = new User();
         user2.setUsername("fglenanne");
         user2.setPassword("password");
+        user2.setEncryptedPassword(encryptionService.encryptString("password"));
 
         Customer customer2 = new Customer();
         customer2.setFirstName("Fiona");

@@ -19,6 +19,7 @@ public class SpringSecConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationProvider authenticationProvider;
 
     @Autowired
+    @Qualifier("daoAuthenticationProvider")
     public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
         this.authenticationProvider = authenticationProvider;
     }
@@ -30,7 +31,19 @@ public class SpringSecConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeRequests().antMatchers("/").permitAll();
+       httpSecurity.csrf().ignoringAntMatchers("/h2-console/**").disable()
+               .headers().frameOptions().disable()
+               .and()
+               .authorizeRequests().antMatchers("/**/favicons.ico").permitAll()
+               .and().authorizeRequests().antMatchers("/product/**").permitAll()
+               .and().authorizeRequests().antMatchers("/webjars/**").permitAll()
+               .and().authorizeRequests().antMatchers("/static/css").permitAll()
+               .and().authorizeRequests().antMatchers("/js").permitAll()
+               .and().formLogin().loginPage("/login").permitAll()
+               .and().authorizeRequests().antMatchers("/customer/**").authenticated()
+               .and().authorizeRequests().antMatchers("/user/**").hasAnyAuthority("ADMIN")
+               .and().exceptionHandling().accessDeniedPage("/access_denied");
+
     }
 
     @Bean
