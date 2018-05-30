@@ -13,6 +13,7 @@ import java.util.List;
 public class User extends AbstractDomainClass  {
 
     private String username;
+    private Integer failedAttempts = 0;
 
     @Transient
     private String password;
@@ -72,6 +73,15 @@ public class User extends AbstractDomainClass  {
         this.customer = customer;
         customer.setUser(this);
     }
+
+    public Integer getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = failedAttempts;
+    }
+
 
     public Cart getCart() {
         return cart;
