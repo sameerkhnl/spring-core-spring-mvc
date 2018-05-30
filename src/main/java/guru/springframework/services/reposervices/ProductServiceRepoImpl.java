@@ -5,6 +5,7 @@ import guru.springframework.converters.ProductFormToProduct;
 import guru.springframework.domain.Product;
 import guru.springframework.repositories.ProductRepository;
 import guru.springframework.services.ProductService;
+import guru.springframework.services.SendTextMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,12 @@ public class ProductServiceRepoImpl implements ProductService {
 
     private ProductRepository productRepository;
     private ProductFormToProduct productFormToProduct;
+    private SendTextMessageService sendTextMessageService;
+
+    @Autowired
+    public void setSendTextMessageService(SendTextMessageService sendTextMessageService) {
+        this.sendTextMessageService = sendTextMessageService;
+    }
 
     @Autowired
     public void setProductRepository(ProductRepository productRepository) {
@@ -33,6 +40,7 @@ public class ProductServiceRepoImpl implements ProductService {
     }
     @Override
     public List<?> listAll() {
+        sendTextMessageService.sendTextMessage("Listing products");
         List<Product> products = new ArrayList<>();
         productRepository.findAll().forEach(products::add); //fun with Java 8
         return products;
@@ -40,6 +48,7 @@ public class ProductServiceRepoImpl implements ProductService {
 
     @Override
     public Product getById(Integer id) {
+        sendTextMessageService.sendTextMessage("Requested product id: " + id);
         return productRepository.findOne(id);
     }
 
